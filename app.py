@@ -399,7 +399,6 @@ skill_name = selected_display.lower()
 skill = load_skill(skill_name)
 
 if st.session_state.previous_skill != skill_name:
-    st.session_state.chat_history = []
     st.session_state.previous_skill = skill_name
 
 # Display Skill metadata description
@@ -522,6 +521,10 @@ with col_center:
                     })
                 
                 st.session_state.detected_anomalies = detected
+                st.session_state.last_results = detected
+                st.session_state.last_skill_name = skill_name
+                st.session_state.last_skill_description = skill.description
+                st.session_state.chat_history = []
                 status_text.markdown("<div style='text-align:center; color:#000000; font-size:12.5px; font-weight:700; text-transform:uppercase;'>✓ Local execution complete.</div>", unsafe_allow_html=True)
                 time.sleep(0.4)
                 st.rerun()
@@ -566,7 +569,7 @@ with col_center:
     st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown("<hr style='margin: 30px 0 24px 0; border:none; border-top:2px solid #000000;' />", unsafe_allow_html=True)
-col_right, col_chat = st.columns(2, gap="large")
+col_right = st.container()
 
 with col_right:
     st.markdown("<h3 style='color:#000000; margin-top:0; font-size:15px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;'>Intelligence Alerts</h3>", unsafe_allow_html=True)
@@ -642,21 +645,6 @@ with col_right:
                             st.session_state.last_latency = (t_end - t_start) * 1000.0
                             st.session_state.explanations[alert_id] = explanation
                             
-                            # Real-time Reasoning: Pipe to local chat history automatically
-                            clean_data_list = ", ".join([f"{k}: {v}" for k, v in row_data.items() if k not in ("anomaly_score", "is_anomaly")])
-                            chat_entry_user = {
-                                "role": "user",
-                                "content": f"Please explain Anomaly #{idx+1} ({confidence}% Confidence) representing:\n`{clean_data_list}`"
-                            }
-                            chat_entry_assistant = {
-                                "role": "assistant",
-                                "content": f"**Local AI Assessment (Anomaly #{idx+1}):**\n\n{explanation}"
-                            }
-                            
-                            if not any(msg["content"] == chat_entry_user["content"] for msg in st.session_state.chat_history):
-                                st.session_state.chat_history.append(chat_entry_user)
-                                st.session_state.chat_history.append(chat_entry_assistant)
-                                
                             st.rerun()
                             
                     explanation_text = st.session_state.explanations.get(alert_id, "Processing...")
@@ -667,77 +655,70 @@ with col_right:
                     </div>
                     """, unsafe_allow_html=True)
 
-# --- CLAUDE-LIKE LOCAL CHAT PANEL ---
-with col_chat:
-        st.markdown("<h3 style='color:#000000; margin-top:0; font-size:15px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;'>AI Chat Notepad</h3>", unsafe_allow_html=True)
-        st.markdown("<p style='color:#666666; font-size:12.5px; margin-top:-8px; margin-bottom:16px;'>Ask follow-up questions about flagged data.</p>", unsafe_allow_html=True)
-        
-        # Chat welcome message init
-        if not st.session_state.chat_history:
-            welcome_msg = f"Offline AI session initiated for **{skill_name.title()}** pack. Ask me any follow-up questions about the data logs."
-            st.session_state.chat_history.append({"role": "assistant", "content": welcome_msg})
-            
-        # Scrollable Chat Container
-        st.markdown('<div class="chat-notepad">', unsafe_allow_html=True)
-        chat_container = st.container(height=520)
-        with chat_container:
-            for message in st.session_state.chat_history:
-                with st.chat_message(message["role"]):
-                    st.markdown(message["content"])
-        st.markdown('</div>', unsafe_allow_html=True)
-                    
-        # User input field
-        if user_prompt := st.chat_input("Write follow-up query..."):
-            st.session_state.chat_history.append({"role": "user", "content": user_prompt})
-            
-            anomalies_context = ""
-            if st.session_state.detected_anomalies:
-                anomalies_context = "Here are the anomalies currently flagged in the workspace:\n"
-                for idx, alert in enumerate(st.session_state.detected_anomalies):
-                    row_data = alert["row"]
-                    conf = alert["confidence"]
-                    anomalies_context += f"- Anomaly #{idx+1} ({conf}% confidence): "
-                    anomalies_context += ", ".join([f"{k}: {v}" for k, v in row_data.items() if k not in ("anomaly_score", "is_anomaly")])
-                    
-                    alert_id = f"alert_{idx}"
-                    if alert_id in st.session_state.explanations:
-                        anomalies_context += f" (Explanation: {st.session_state.explanations[alert_id]})"
-                    anomalies_context += "\n"
-            else:
-                anomalies_context = "No anomalies have been run/flagged yet in the workspace.\n"
-                
-            skill_context = f"Active Skill Pack: {skill_name.title()}\nDescription: {skill.description}\n"
-            
-            chat_context = "Previous exchange history:\n"
-            for msg in st.session_state.chat_history[:-1]:
-                chat_context += f"{msg['role'].upper()}: {msg['content']}\n"
-                
-            llm_prompt = f"""You are the offline CoreMind Assistant for the '{skill_name.title()}' Skill Pack.
-Analyze the user's question locally. You only have access to the data on this device.
+# --- CONVERSATIONAL FOLLOW-UP CHAT ---
+st.markdown("<hr style='margin: 30px 0 24px 0; border:none; border-top:1px solid #000000;' />", unsafe_allow_html=True)
+st.markdown("<h3 style='color:#000000; margin-top:0; font-size:15px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;'>AI Chat Notepad</h3>", unsafe_allow_html=True)
+st.markdown("<p style='color:#666666; font-size:12.5px; margin-top:-8px; margin-bottom:16px;'>Ask follow-up questions about the latest analysis.</p>", unsafe_allow_html=True)
 
-[Workspace Context]
-{skill_context}
+if "last_results" not in st.session_state:
+    st.info("Run an analysis first to ask follow-up questions about its flagged anomalies.")
+else:
+    clear_col, _ = st.columns([1, 5])
+    with clear_col:
+        if st.button("Clear chat", key="clear_chat", type="secondary", use_container_width=True):
+            st.session_state.chat_history = []
+            st.rerun()
+
+    chat_container = st.container(height=420)
+    with chat_container:
+        for message in st.session_state.chat_history:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+
+    if user_prompt := st.chat_input("Ask about the latest analysis..."):
+        st.session_state.chat_history.append({"role": "user", "content": user_prompt})
+        anomalies_context = "\n".join(
+            "- Anomaly #{}: {}".format(
+                idx + 1,
+                ", ".join(
+                    f"{key}: {value}"
+                    for key, value in alert["row"].items()
+                    if key not in ("anomaly_score", "is_anomaly")
+                ),
+            )
+            for idx, alert in enumerate(st.session_state.last_results)
+        )
+        chat_context = "\n".join(
+            f"{message['role'].upper()}: {message['content']}"
+            for message in st.session_state.chat_history[:-1]
+        )
+        analysis_skill_name = st.session_state.last_skill_name.title()
+        analysis_description = st.session_state.last_skill_description
+        llm_prompt = f"""You are the offline CoreMind Assistant.
+
+[Analysis Context]
+Skill Pack: {analysis_skill_name}
+Description: {analysis_description}
+Flagged Anomalies (raw data only):
 {anomalies_context}
 
-[Conversation Context]
+[Conversation History]
 {chat_context}
 
 User Question: {user_prompt}
 
-In 2-3 clean, plain-English sentences, explain the reasoning. Do not mention cloud, API key, or server connection since you run 100% locally on Ollama."""
+Answer in 2-4 plain-English sentences. Only use numbers and facts given in the analysis context. Do not invent additional statistics, counts, causes, or details. If the context does not support an answer, say so plainly."""
 
-            with chat_container:
-                with st.chat_message("assistant"):
-                    with st.spinner("AI thinking..."):
-                        t_start = time.time()
-                        response = llm.generate(llm_prompt)
-                        t_end = time.time()
-                        
-                        st.session_state.last_latency = (t_end - t_start) * 1000.0
-                        st.markdown(response)
-                        
-            st.session_state.chat_history.append({"role": "assistant", "content": response})
-            st.rerun()
+        with chat_container:
+            with st.chat_message("assistant"):
+                with st.spinner("AI thinking..."):
+                    t_start = time.time()
+                    response = llm.generate(llm_prompt)
+                    st.session_state.last_latency = (time.time() - t_start) * 1000.0
+                    st.markdown(response)
+
+        st.session_state.chat_history.append({"role": "assistant", "content": response})
+        st.rerun()
 
 # --- PRIVACY RIBBON IN FOOTER ---
 st.markdown("<hr style='margin: 30px 0 15px 0; border:none; border-top:1px solid #000000;' />", unsafe_allow_html=True)

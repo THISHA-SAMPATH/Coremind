@@ -1,0 +1,10 @@
+topic,score_pct,avg_time_sec,attempts
+Arrays,85,24,5
+Recursion,42,70,3
+Sorting,80,29,4
+Dynamic Programming,35,80,2
+Graphs,88,26,4
+Linked Lists,91,20,5
+Trees,78,33,3
+Hashing,48,58,3
+Backtracking,52,65,2

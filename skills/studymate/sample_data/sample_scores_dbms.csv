@@ -1,0 +1,9 @@
+topic,score_pct,avg_time_sec,attempts
+Normalization,40,72,2
+SQL Joins,89,22,5
+Indexing,44,68,3
+Transactions,82,28,4
+Concurrency Control,36,85,2
+ER Modeling,90,19,5
+NoSQL Basics,55,55,3
+B+ Trees,50,60,3

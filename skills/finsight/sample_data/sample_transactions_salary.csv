@@ -1,0 +1,11 @@
+date,merchant,amount,hour_of_day
+2026-07-01,Rent Payment,15000,10
+2026-07-02,Grocery Mart,2200,18
+2026-07-03,Electricity Board,1800,12
+2026-07-04,Grocery Mart,2100,19
+2026-07-05,Fuel Station,1500,9
+2026-07-06,Unknown Wallet Transfer,55000,2
+2026-07-07,Grocery Mart,2300,18
+2026-07-08,Insurance Premium,4500,11
+2026-07-09,Unknown Wallet Transfer,55000,3
+2026-07-10,Fuel Station,1450,9

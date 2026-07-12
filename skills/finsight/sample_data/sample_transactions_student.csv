@@ -1,0 +1,14 @@
+date,merchant,amount,hour_of_day
+2026-07-01,Swiggy,250,13
+2026-07-01,Zomato,180,20
+2026-07-02,Amazon,650,16
+2026-07-02,Uber,120,9
+2026-07-03,Netflix,199,11
+2026-07-03,Swiggy,300,14
+2026-07-04,Bookstore,899,17
+2026-07-04,CryptoXYZ Transfer,38000,4
+2026-07-05,Uber,140,8
+2026-07-05,Zomato,220,19
+2026-07-06,Amazon,450,15
+2026-07-06,CryptoXYZ Transfer,38000,4
+2026-07-07,Swiggy,270,13
