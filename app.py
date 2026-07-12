@@ -448,6 +448,7 @@ sample_path_by_skill = {
     "sentinel": "skills/sentinel/sample_data/sample_logs.csv",
     "finsight": "skills/finsight/sample_data/sample_transactions.csv",
     "studymate": "skills/studymate/sample_data/sample_scores.csv",
+    "healthguard": "skills/healthguard/sample_data/sample_vitals.csv",
 }
 
 raw_df = None
@@ -552,6 +553,12 @@ with col_center:
         <h3 style="margin-top:0; font-size:16px; font-weight:700; font-family: 'Playfair Display', serif;">StudyMate Node — Study Performance Analysis</h3>
         <p style="font-size:12.5px; line-height:1.6; color:#222222; margin-bottom:0;">
             StudyMate analyzes quiz and practice scores locally, flags topics where performance is anomalously weak relative to the student's own average, and explains what to focus on next — entirely on-device, no data leaves the machine.
+        </p>
+    </div>
+    <div style="border: 1px solid #000000; padding: 24px; margin-bottom: 20px; background-color: #FFFFFF;">
+        <h3 style="margin-top:0; font-size:16px; font-weight:700; font-family: 'Playfair Display', serif;">HealthGuard Node — Personal Vitals Analysis</h3>
+        <p style="font-size:12.5px; line-height:1.6; color:#222222; margin-bottom:0;">
+            HealthGuard analyzes daily health vitals locally, flags anomalous readings in heart rate, sleep, or activity, and explains them in plain language — one of the most sensitive data categories a person has, and it never leaves the device.
         </p>
     </div>
     """, unsafe_allow_html=True)

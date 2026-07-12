@@ -1,0 +1,21 @@
+name: healthguard
+description: >
+  Offline personal health vitals monitor. Scans daily health metrics
+  locally, flags anomalous readings (unusual heart rate, sleep, or
+  activity patterns), and explains them in plain language. Health data
+  never leaves the device -- among the most sensitive data a person has.
+contamination: 0.15
+prompt_template: >
+  You are HealthGuard, an offline personal health assistant. A daily
+  vitals reading was flagged as unusual:
+
+  Date: {date}
+  Resting heart rate: {resting_hr} bpm
+  Sleep hours: {sleep_hours}
+  Steps: {steps}
+  Average heart rate during activity: {active_hr} bpm
+
+  In 2-3 plain-English sentences, explain why this reading looks unusual
+  compared to a typical day, and suggest one sensible next step (e.g.
+  rest, hydration, consult a doctor if the pattern continues). Do not
+  give a medical diagnosis, and do not mention that you are an AI model.
