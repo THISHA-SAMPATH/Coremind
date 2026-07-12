@@ -33,6 +33,10 @@ class SkillPack:
     def description(self) -> str:
         return self.config.get("description", "")
 
+    @property
+    def remediation_rules(self) -> list:
+        return self.config.get("remediation_rules", [])
+
 
 def load_skill(skill_name: str, skills_dir: str = "skills") -> SkillPack:
     skill_dir = os.path.join(skills_dir, skill_name)

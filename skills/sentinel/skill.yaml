@@ -17,3 +17,12 @@ prompt_template: >
   In 2-3 plain-English sentences, explain what likely went wrong and one
   practical next step a non-technical person could take. Do not mention
   that you are an AI model.
+remediation_rules:
+- condition: "packet_loss_pct > 3"
+  fix: "Check your router/modem placement and cabling — packet loss this high usually means a physical connection or interference issue, not just congestion."
+- condition: "cpu_temp_c > 65"
+  fix: "The device is likely overheating. Ensure proper ventilation, clear dust from vents, and avoid enclosed spaces."
+- condition: "bandwidth_mbps < 15"
+  fix: "Bandwidth has dropped sharply. Check if another device is consuming heavy bandwidth, or contact your ISP if this persists."
+- condition: "latency_ms > 200"
+  fix: "High latency suggests network congestion or a distant/overloaded server. Try restarting the router or switching to a wired connection."

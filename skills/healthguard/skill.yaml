@@ -19,3 +19,10 @@ prompt_template: >
   compared to a typical day, and suggest one sensible next step (e.g.
   rest, hydration, consult a doctor if the pattern continues). Do not
   give a medical diagnosis, and do not mention that you are an AI model.
+remediation_rules:
+- condition: "resting_hr > 90"
+  fix: "An elevated resting heart rate can indicate stress, poor sleep, illness, or dehydration. Prioritize rest and hydration, and see a doctor if this persists more than a few days."
+- condition: "sleep_hours < 5"
+  fix: "Sleep well below normal levels affects recovery and heart rate. Aim to catch up on sleep over the next day or two and avoid stimulants like caffeine late in the day."
+- condition: "steps < 2000 and active_hr > 140"
+  fix: "Low activity alongside a high active heart rate can mean the body is under strain even during light movement. Take it easy and monitor how you feel; consult a doctor if this pattern continues."

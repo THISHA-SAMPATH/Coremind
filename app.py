@@ -17,6 +17,7 @@ import psutil
 
 from core.llm_client import LocalLLM
 from core.pipeline import add_numeric_guardrail
+from core.remediation import match_rules
 from core.skill_loader import list_available_skills, load_skill
 
 # --- INITIALIZE SESSION STATES ---
@@ -32,6 +33,8 @@ if "expanded_alerts" not in st.session_state:
     st.session_state.expanded_alerts = {}
 if "explanations" not in st.session_state:
     st.session_state.explanations = {}
+if "remediations" not in st.session_state:
+    st.session_state.remediations = {}
 if "last_latency" not in st.session_state:
     st.session_state.last_latency = 425.0
 if "chat_history" not in st.session_state:
@@ -479,6 +482,7 @@ with col_center:
         st.session_state.detected_anomalies = []
         st.session_state.expanded_alerts = {}
         st.session_state.explanations = {}
+        st.session_state.remediations = {}
         
         with loader_placeholder.container():
             st.markdown("""
@@ -630,6 +634,46 @@ with col_right:
                 if st.button(btn_label, key=f"btn_{alert_id}", use_container_width=True):
                     st.session_state.expanded_alerts[alert_id] = not is_expanded
                     st.rerun()
+
+                if st.button("How do I fix this?", key=f"fix_{alert_id}", use_container_width=True, type="secondary"):
+                    matched_fixes = match_rules(row_data, skill.remediation_rules)
+                    if matched_fixes:
+                        raw_data = {
+                            key: value
+                            for key, value in row_data.items()
+                            if key not in ("anomaly_score", "is_anomaly")
+                        }
+                        fixes_context = "\n".join(f"- {fix}" for fix in matched_fixes)
+                        remediation_prompt = f"""Based on this data: {raw_data}
+
+The following human-authored fixes apply:
+{fixes_context}
+
+Rephrase the applicable fix naturally in 1-2 sentences, referencing the specific data where helpful. Do not add any suggestions, causes, numbers, or details beyond the data and fixes given above."""
+                        with st.spinner("Preparing rule-based guidance..."):
+                            t_start = time.time()
+                            guidance = llm.generate(remediation_prompt)
+                            st.session_state.last_latency = (time.time() - t_start) * 1000.0
+                        st.session_state.remediations[alert_id] = {
+                            "guidance": guidance,
+                            "matched_fixes": matched_fixes,
+                        }
+                    else:
+                        st.session_state.remediations[alert_id] = {
+                            "guidance": "no specific rule matched — showing general guidance. No deterministic remediation rule is available for this anomaly.",
+                            "matched_fixes": [],
+                        }
+                    st.rerun()
+
+                if alert_id in st.session_state.remediations:
+                    remediation = st.session_state.remediations[alert_id]
+                    guidance = remediation["guidance"]
+                    st.markdown(f"""
+                    <div class="alert-explanation">
+                        <strong style="font-weight:700;">Rule-based guidance:</strong><br/>
+                        {guidance}
+                    </div>
+                    """, unsafe_allow_html=True)
                 
                 # Display LLM explanation if expanded
                 if is_expanded:

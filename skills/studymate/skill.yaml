@@ -19,3 +19,10 @@ prompt_template: >
   step to improve it (e.g. revise a specific concept, do more timed
   practice, revisit fundamentals). Do not mention that you are an AI
   model.
+remediation_rules:
+- condition: "score_pct < 50 and avg_time_sec > 60"
+  fix: "Low score with slow response time suggests a fundamentals gap, not just carelessness. Go back to basic concept videos or notes before attempting more practice problems."
+- condition: "score_pct < 50 and avg_time_sec <= 60"
+  fix: "Low score with reasonably fast answers suggests confident but incorrect understanding. Review worked examples closely to spot where the logic breaks down."
+- condition: "attempts <= 2 and score_pct < 60"
+  fix: "Few attempts and a low score mean there isn't much practice data yet. Do a few more timed practice sets on this topic before drawing conclusions."

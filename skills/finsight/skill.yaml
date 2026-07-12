@@ -18,3 +18,10 @@ prompt_template: >
   In 2-3 plain-English sentences, explain why this transaction looks
   unusual and suggest one practical thing the user should check. Do not
   mention that you are an AI model.
+remediation_rules:
+- condition: "amount > 10000 and hour_of_day < 6"
+  fix: "Large transactions in the early hours are a common fraud pattern. Verify this charge directly with your bank or card issuer immediately."
+- condition: "merchant_frequency >= 2 and amount > 5000"
+  fix: "This merchant charged a similarly large amount more than once. Check your statement for duplicate billing and consider disputing if unauthorized."
+- condition: "amount > 20000"
+  fix: "This is an unusually large single transaction. Confirm you authorized it, and check if it matches an expected purchase like rent, insurance, or a planned expense."
