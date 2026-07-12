@@ -1,0 +1,99 @@
+# CoreMind
+
+**A local-first anomaly intelligence engine that runs entirely on-device — no cloud, no API calls.**
+
+Built for OSDHack 2026 (On Device AI theme).
+
+## Problem
+
+Two very different problems share the same shape: something is generating a stream of
+data (network logs, bank transactions), most of it is normal, and the rare abnormal
+entries matter a lot — but they're buried in noise a non-technical person can't easily read.
+
+## Solution
+
+CoreMind is one local engine — shared anomaly detection (Isolation Forest) + a local LLM
+that explains flagged anomalies in plain English — specialized to a domain through
+lightweight **skill packs**. Each skill pack is just a config file + a small feature
+extractor; the core engine and LLM pipeline never change.
+
+We built two skill packs to prove it:
+
+- **Sentinel** — network/system health copilot. Flags latency spikes, packet loss,
+  overheating from local logs, and explains what's likely wrong.
+- **FinSight** — offline personal finance analyzer. Flags unusual spending, duplicate
+  charges, or possible fraud from bank statement CSVs. Financial data never leaves
+  the device — the whole point of running this locally.
+
+## On-Device AI Usage
+
+- **LLM**: runs locally via [Ollama](https://ollama.com), default model `phi3:mini`
+  (swap for `gemma:2b` or similar). No network calls at inference time.
+- **Anomaly detection**: scikit-learn Isolation Forest, runs in-process, no external
+  services.
+- Internet is never required to run the core pipeline. (Optional cloud use — e.g.
+  hosting a future dashboard — would only ever touch non-core features.)
+
+## Tech Stack
+
+- Python 3.10+
+- scikit-learn (anomaly detection)
+- Ollama (local LLM serving)
+- pandas, PyYAML
+
+## Setup
+
+```bash
+git clone <this-repo>
+cd coremind
+pip install -r requirements.txt
+
+# Install Ollama: https://ollama.com/download
+ollama pull phi3:mini
+ollama serve   # usually starts automatically after install
+```
+
+## Usage
+
+```bash
+# List available skill packs
+python cli.py --list
+
+# Run Sentinel on sample network logs
+python cli.py --skill sentinel --input skills/sentinel/sample_data/sample_logs.csv
+
+# Run FinSight on sample transactions
+python cli.py --skill finsight --input skills/finsight/sample_data/sample_transactions.csv
+```
+
+If Ollama isn't running, CoreMind falls back to a labeled stub response so you can
+still test the anomaly-detection pipeline end-to-end.
+
+## Adding a New Skill Pack
+
+1. Create `skills/<name>/skill.yaml` (description, prompt_template, contamination rate)
+2. Create `skills/<name>/feature_extractor.py` with an `extract_features(raw_df)` function
+3. That's it — `core/pipeline.py` and `core/anomaly_engine.py` need zero changes.
+
+This is the architectural bet of the project: adding a third, fourth, fifth domain
+(study assistant, health tracker, anything with an anomaly-shaped problem) is cheap.
+
+## Demo Video
+
+[link here]
+
+## Screenshots
+
+[add here]
+
+## License
+
+MIT — see [LICENSE](LICENSE)
+
+## Known Limitations / Future Scope
+
+- Currently CLI-only; a lightweight UI (Streamlit/Tauri) is the natural next step.
+- Contamination rate per skill is currently static; could be tuned automatically per
+  dataset size.
+- A study-assistant skill pack (RAG + quiz generation) is a natural extension the
+  architecture already supports.

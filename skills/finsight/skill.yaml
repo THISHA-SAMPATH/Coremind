@@ -1,0 +1,20 @@
+name: finsight
+description: >
+  Offline personal finance analyzer. Scans bank statement transactions
+  locally, flags unusual spending, duplicate charges, or possible fraud,
+  and explains findings in plain language. Financial data never leaves
+  the device.
+contamination: 0.1
+prompt_template: >
+  You are FinSight, an offline personal finance assistant. A transaction
+  was flagged as unusual:
+
+  Date: {date}
+  Merchant: {merchant}
+  Amount: Rs. {amount}
+  Hour of day: {hour_of_day}
+  Times this merchant appears this month: {merchant_frequency}
+
+  In 2-3 plain-English sentences, explain why this transaction looks
+  unusual and suggest one practical thing the user should check. Do not
+  mention that you are an AI model.

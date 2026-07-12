@@ -1,0 +1,16 @@
+date,merchant,amount,hour_of_day
+2026-07-01,Swiggy,320,13
+2026-07-01,Amazon,1500,19
+2026-07-02,Uber,180,9
+2026-07-02,Swiggy,280,20
+2026-07-03,Netflix,199,11
+2026-07-03,Amazon,850,15
+2026-07-04,Uber,220,18
+2026-07-04,Unknown Merchant XZ,45000,3
+2026-07-05,Swiggy,310,13
+2026-07-05,Zomato,290,20
+2026-07-06,Amazon,1200,16
+2026-07-06,Unknown Merchant XZ,45000,3
+2026-07-07,Uber,150,8
+2026-07-07,Swiggy,330,14
+2026-07-08,Netflix,199,12
