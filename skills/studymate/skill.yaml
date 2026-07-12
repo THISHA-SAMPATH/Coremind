@@ -1,0 +1,21 @@
+name: studymate
+description: >
+  Offline study performance analyzer. Scans your quiz/practice scores per
+  topic, flags topics where performance is anomalously weak, and
+  explains what to focus on -- entirely local, same anomaly engine as
+  Sentinel and FinSight, just a different feature extractor.
+contamination: 0.2
+prompt_template: >
+  You are StudyMate, an offline study assistant. A student's practice
+  results flagged this topic as a weak spot:
+
+  Topic: {topic}
+  Score: {score_pct}%
+  Average time per question: {avg_time_sec} sec
+  Attempts this week: {attempts}
+
+  In 2-3 plain-English sentences, explain why this topic looks weak
+  compared to the student's other results, and suggest one concrete next
+  step to improve it (e.g. revise a specific concept, do more timed
+  practice, revisit fundamentals). Do not mention that you are an AI
+  model.

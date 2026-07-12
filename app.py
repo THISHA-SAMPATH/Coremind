@@ -16,6 +16,7 @@ import streamlit as st
 import psutil
 
 from core.llm_client import LocalLLM
+from core.pipeline import add_numeric_guardrail
 from core.skill_loader import list_available_skills, load_skill
 
 # --- INITIALIZE SESSION STATES ---
@@ -447,6 +448,7 @@ ollama_badge_html = (
 sample_path_by_skill = {
     "sentinel": "skills/sentinel/sample_data/sample_logs.csv",
     "finsight": "skills/finsight/sample_data/sample_transactions.csv",
+    "studymate": "skills/studymate/sample_data/sample_scores.csv",
 }
 
 raw_df = None
@@ -543,6 +545,12 @@ with col_center:
             FinSight executes on-device financial analysis. It reads private bank statement ledger entries, calculates transaction densities and frequencies, isolates suspicious spending events, and evaluates potential ledger errors without transmitting financial histories to third-party web servers.
         </p>
     </div>
+    <div style="border: 1px solid #000000; padding: 24px; margin-bottom: 20px; background-color: #FFFFFF;">
+        <h3 style="margin-top:0; font-size:16px; font-weight:700; font-family: 'Playfair Display', serif;">StudyMate Node — Study Performance Analysis</h3>
+        <p style="font-size:12.5px; line-height:1.6; color:#222222; margin-bottom:0;">
+            StudyMate analyzes quiz and practice scores locally, flags topics where performance is anomalously weak relative to the student's own average, and explains what to focus on next — entirely on-device, no data leaves the machine.
+        </p>
+    </div>
     """, unsafe_allow_html=True)
 
     # Data Preview card
@@ -628,7 +636,7 @@ with col_right:
                                 depth_mod = "\nExplain in 2-3 clean, plain-English sentences."
                                 
                             prompt = skill.prompt_template.format(**row_data) + depth_mod
-                            explanation = llm.generate(prompt)
+                            explanation = add_numeric_guardrail(llm.generate(prompt), row_data)
                             
                             t_end = time.time()
                             st.session_state.last_latency = (t_end - t_start) * 1000.0

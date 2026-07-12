@@ -13,7 +13,6 @@ Setup on your machine (not needed in this sandbox):
     3. ollama serve               (usually starts automatically)
 """
 
-import json
 import requests
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
@@ -41,10 +40,21 @@ class LocalLLM:
         if not self.is_available():
             return self._stub_response(prompt)
 
+        guarded_prompt = (
+            prompt
+            + "\n\nImportant: Only use the numbers and facts given above. "
+            "Do not invent additional statistics, counts, or details not present in the data."
+        )
+
         try:
             resp = requests.post(
                 OLLAMA_URL,
-                json={"model": self.model, "prompt": prompt, "stream": False},
+                json={
+                    "model": self.model,
+                    "prompt": guarded_prompt,
+                    "stream": False,
+                    "options": {"temperature": 0.2},
+                },
                 timeout=self.timeout,
                 proxies={"http": None, "https": None},
             )
