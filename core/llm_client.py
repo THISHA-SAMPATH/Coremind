@@ -21,13 +21,13 @@ DEFAULT_MODEL = "phi3:mini"
 
 
 class LocalLLM:
-    def __init__(self, model: str = DEFAULT_MODEL, timeout: int = 30):
+    def __init__(self, model: str = DEFAULT_MODEL, timeout: int = 120):
         self.model = model
         self.timeout = timeout
 
     def is_available(self) -> bool:
         try:
-            requests.get("http://localhost:11434", timeout=2)
+            requests.get("http://localhost:11434", timeout=2, proxies={"http": None, "https": None})
             return True
         except requests.exceptions.RequestException:
             return False
@@ -46,6 +46,7 @@ class LocalLLM:
                 OLLAMA_URL,
                 json={"model": self.model, "prompt": prompt, "stream": False},
                 timeout=self.timeout,
+                proxies={"http": None, "https": None},
             )
             resp.raise_for_status()
             return resp.json().get("response", "").strip()
